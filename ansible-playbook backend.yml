@@ -1,0 +1,41 @@
+hosts: backend
+  become: yes
+
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+
+    - name: Pull latest backend code
+      git:
+        repo: "https://github.com/Devin471/Backend.git"
+        dest: "/var/www/backend"
+        version: "master"
+        force: yes
+
+    - name: Install backend dependencies
+      npm:
+        path: "/var/www/backend"
+        state: present
+    - name: Pull latest backend code
+      git:
+        repo: "https://github.com/Devin471/Backend.git"
+        dest: "/var/www/backend"
+        version: "master"
+        force: yes
+
+    - name: Install backend dependencies
+      npm:
+        path: "/var/www/backend"
+        state: present
+
+    - name: Restart Backend using PM2
+      shell: |
+        pm2 stop backend || true
+        pm2 start /var/www/backend/src/server.js --name backend
+        pm2 save
