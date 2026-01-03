@@ -1,0 +1,41 @@
+- hosts: frontend
+  become: yes
+
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+
+    - name: Pull latest frontend code
+      git:
+        repo: "https://github.com/Devin471/scientist.git"
+        dest: "/var/www/frontend"
+        version: "master"
+        force: yes
+
+    - name: Install frontend dependencies
+      shell: npm install
+      args:
+        chdir: /var/www/frontend
+   - name: Build frontend
+     shell: npm run build
+      args:
+        chdir: /var/www/frontend
+
+    - name: Move build to Nginx root
+      copy:
+        src: /var/www/frontend/dist/
+        dest: /var/www/frontend/dist/
+        owner: www-data
+        group: www-data
+        remote_src: yes
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
